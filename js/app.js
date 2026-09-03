@@ -613,11 +613,11 @@ function afterUnlock() {
 function hideSplash() {
   const el = $("splash");
   if (!el || el.classList.contains("gone")) return;
+  openLock();
   el.classList.add("gone");
   window.setTimeout(() => {
     el.remove();
-    openLock();
-  }, 420);
+  }, 450);
 }
 
 async function wake() {

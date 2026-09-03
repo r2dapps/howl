@@ -92,20 +92,7 @@ html, body {
   background: radial-gradient(ellipse at 50% 46%, transparent 18%, rgba(18, 9, 16, 0.35) 62%, rgba(18, 9, 16, 0.55) 100%);
   pointer-events: none;
 }
-.splash-mark {
-  position: absolute;
-  z-index: 1;
-  left: max(18px, calc(50% - 10rem));
-  top: 50%;
-  transform: translateY(-50%);
-  width: min(52px, 12vw);
-  height: min(52px, 12vw);
-  object-fit: cover;
-  border-radius: 50%;
-  box-shadow: 0 0 28px var(--glow);
-  border: 2px solid color-mix(in srgb, var(--rose) 42%, #120910);
-  animation: heartpulse 1.4s ease-in-out infinite;
-}
+
 
 .lock {
   position: fixed;
@@ -115,21 +102,37 @@ html, body {
   place-items: center;
   padding: 20px;
   background: #120910;
+  overflow: hidden;
 }
 .lock[hidden] { display: none !important; }
 .lock-sky {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -28px;
+  width: calc(100% + 56px);
+  height: calc(100% + 56px);
   object-fit: cover;
-  opacity: 0.9;
+  opacity: 0.95;
+  filter: blur(22px) saturate(1.18) brightness(0.88);
+  transform: scale(1.08);
+  will-change: filter, transform;
 }
 .lock::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(18, 9, 16, 0.35), rgba(18, 9, 16, 0.82) 70%);
+  z-index: 0;
+  background:
+    radial-gradient(ellipse at 50% 28%, rgba(244, 63, 142, 0.18), transparent 52%),
+    linear-gradient(180deg, rgba(18, 9, 16, 0.28), rgba(18, 9, 16, 0.72) 58%, rgba(18, 9, 16, 0.88) 100%);
+  pointer-events: none;
+}
+.lock::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
   pointer-events: none;
 }
 .lock-card {
@@ -142,10 +145,14 @@ html, body {
   gap: 12px;
   padding: 28px 22px 22px;
   border-radius: 24px;
-  border: 1px solid var(--line);
-  background: color-mix(in srgb, var(--bg-2) 86%, transparent);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  border: 1px solid color-mix(in srgb, var(--rose) 22%, var(--line));
+  background: color-mix(in srgb, var(--bg-2) 72%, transparent);
+  backdrop-filter: blur(28px) saturate(1.2);
+  -webkit-backdrop-filter: blur(28px) saturate(1.2);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(244, 63, 142, 0.12),
+    inset 0 1px 0 rgba(255, 246, 251, 0.06);
   text-align: center;
 }
 .lock-mark {
@@ -1246,10 +1253,11 @@ button, textarea, input { font: inherit; color: inherit; }
   .msg,
   .brand-mark.live,
   .avatar.live,
-  .splash-mark,
   .howl-spin.pulse,
   .lock-mark { transition: none; animation: none; }
   .lock.shake .lock-card { animation: none; }
+  .lock-sky { filter: blur(14px) saturate(1.1) brightness(0.9); }
+  .lock::after { backdrop-filter: none; -webkit-backdrop-filter: none; }
   .avatar.live { box-shadow: 0 0 0 3px rgba(244, 63, 142, 0.18), 0 0 16px var(--glow); }
   .thread { scroll-behavior: auto; }
 }

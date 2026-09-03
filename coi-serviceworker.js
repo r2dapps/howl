@@ -166,7 +166,7 @@ if (typeof window === "undefined") {
 } else {
   (() => {
     const coi = {
-      shouldRegister: () => true,
+      shouldRegister: () => !window.crossOriginIsolated,
       shouldDeregister: () => false,
       coepCredentialless: () => !(window.chrome || window.netscape),
       doReload: () => window.location.reload(),
@@ -191,7 +191,7 @@ if (typeof window === "undefined") {
 
     let refreshing = false;
     n.serviceWorker.addEventListener("controllerchange", () => {
-      if (refreshing) return;
+      if (refreshing || window.crossOriginIsolated) return;
       refreshing = true;
       coi.doReload();
     });
