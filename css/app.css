@@ -69,10 +69,9 @@ html, body {
   position: fixed;
   inset: 0;
   z-index: 80;
-  display: grid;
-  place-items: center;
+  display: block;
   background: #120910;
-  transition: opacity 0.55s ease, visibility 0.55s ease;
+  transition: opacity 0.45s ease, visibility 0.45s ease;
 }
 .splash.gone {
   opacity: 0;
@@ -90,18 +89,141 @@ html, body {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 46%, transparent 12%, rgba(18, 9, 16, 0.42) 58%, rgba(18, 9, 16, 0.72) 100%);
+  background: radial-gradient(ellipse at 50% 46%, transparent 18%, rgba(18, 9, 16, 0.35) 62%, rgba(18, 9, 16, 0.55) 100%);
   pointer-events: none;
 }
 .splash-mark {
-  position: relative;
+  position: absolute;
   z-index: 1;
-  width: min(136px, 36vw);
-  height: min(136px, 36vw);
+  left: max(18px, calc(50% - 10rem));
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(52px, 12vw);
+  height: min(52px, 12vw);
   object-fit: cover;
   border-radius: 50%;
-  box-shadow: 0 0 48px var(--glow), 0 0 90px rgba(244, 63, 142, 0.28);
+  box-shadow: 0 0 28px var(--glow);
+  border: 2px solid color-mix(in srgb, var(--rose) 42%, #120910);
   animation: heartpulse 1.4s ease-in-out infinite;
+}
+
+.lock {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #120910;
+}
+.lock[hidden] { display: none !important; }
+.lock-sky {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+}
+.lock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(18, 9, 16, 0.35), rgba(18, 9, 16, 0.82) 70%);
+  pointer-events: none;
+}
+.lock-card {
+  position: relative;
+  z-index: 1;
+  width: min(340px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 22px 22px;
+  border-radius: 24px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg-2) 86%, transparent);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+  text-align: center;
+}
+.lock-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 24px var(--glow);
+  animation: heartpulse 1.6s ease-in-out infinite;
+}
+.lock-card h1 {
+  font-family: Georgia, Palatino, serif;
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+}
+.lock-lede {
+  color: var(--mute);
+  font-size: 0.9rem;
+}
+.pin-dots {
+  display: flex;
+  gap: 14px;
+  margin: 6px 0 2px;
+}
+.pin-dots i {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--rose) 55%, var(--line));
+  background: transparent;
+  transition: background 0.12s ease, box-shadow 0.12s ease, transform 0.12s ease;
+}
+.pin-dots i.on {
+  background: var(--rose);
+  box-shadow: 0 0 12px var(--glow);
+  transform: scale(1.08);
+}
+.lock-note {
+  min-height: 1.1em;
+  color: #ffb4d4;
+  font-size: 0.82rem;
+}
+.lock-note[hidden] { display: none !important; }
+.pin-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+.pin-pad button {
+  height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 1.15rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.08s ease;
+}
+.pin-pad button:hover {
+  border-color: var(--rose);
+  background: color-mix(in srgb, var(--rose) 14%, var(--panel));
+}
+.pin-pad button:active { transform: scale(0.96); }
+.pin-pad button.ghost {
+  color: var(--mute);
+  font-size: 0.95rem;
+}
+.lock.shake .lock-card {
+  animation: lockshake 0.38s ease;
+}
+@keyframes lockshake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-5px); }
 }
 
 button, textarea, input { font: inherit; color: inherit; }
@@ -487,7 +609,10 @@ button, textarea, input { font: inherit; color: inherit; }
 .card {
   width: min(520px, 100%);
   max-height: min(88dvh, 760px);
+  min-height: 0;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: 22px;
@@ -503,30 +628,58 @@ button, textarea, input { font: inherit; color: inherit; }
 }
 .card.profile {
   padding-top: 0;
+  padding-bottom: 0;
   overflow: hidden;
+  height: min(88dvh, 760px);
+  max-height: min(88dvh, 760px);
 }
 .profile-hero {
-  height: 128px;
-  margin: 0 -22px 4px;
+  height: 132px;
+  flex-shrink: 0;
+  margin: 0 -22px 0;
+  position: relative;
   background:
-    linear-gradient(180deg, transparent 28%, var(--bg-2) 100%),
-    url("../docs/assets/howl-banner.png") center 40% / cover no-repeat;
-  display: grid;
-  place-items: end center;
-  padding-bottom: 0;
+    linear-gradient(180deg, transparent 58%, var(--bg-2) 100%),
+    url("../docs/assets/howl-banner.png") center 38% / cover no-repeat;
 }
 .profile-hero img {
-  width: 72px;
-  height: 72px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
   object-fit: cover;
-  position: relative;
-  bottom: -22px;
-  box-shadow: 0 0 28px var(--glow);
-  border: 2px solid color-mix(in srgb, var(--rose) 40%, #120910);
+  position: absolute;
+  left: max(14px, calc(50% - 10rem));
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 20px var(--glow);
+  border: 2px solid color-mix(in srgb, var(--rose) 42%, #120910);
 }
-.card.profile > h2 {
-  margin-top: 28px;
+.profile-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 10px 2px 18px 0;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--rose) 40%, var(--line)) transparent;
+}
+.profile-body > * {
+  flex-shrink: 0;
+}
+.profile-body::-webkit-scrollbar { width: 8px; }
+.profile-body::-webkit-scrollbar-track { background: transparent; }
+.profile-body::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--rose) 38%, var(--line));
+  border-radius: 99px;
+}
+.card.profile > h2,
+.profile-body > h2 {
+  margin-top: 4px;
   text-align: center;
 }
 .lede { color: var(--mute); font-size: 0.9rem; line-height: 1.45; }
@@ -610,17 +763,14 @@ button, textarea, input { font: inherit; color: inherit; }
   gap: 10px;
   text-align: center;
 }
-.howl-spin,
-.howl-logo {
-  width: 72px;
-  height: 72px;
+.howl-spin {
+  width: 64px;
+  height: 64px;
   object-fit: cover;
   border-radius: 50%;
   box-shadow: 0 0 24px var(--glow);
 }
-.howl-logo { width: 88px; height: 88px; margin-bottom: 4px; }
-.howl-spin.pulse,
-.howl-logo.pulse {
+.howl-spin.pulse {
   animation: heartpulse 1.4s ease-in-out infinite;
 }
 @keyframes heartpulse {
@@ -1098,7 +1248,8 @@ button, textarea, input { font: inherit; color: inherit; }
   .avatar.live,
   .splash-mark,
   .howl-spin.pulse,
-  .howl-logo.pulse { transition: none; animation: none; }
+  .lock-mark { transition: none; animation: none; }
+  .lock.shake .lock-card { animation: none; }
   .avatar.live { box-shadow: 0 0 0 3px rgba(244, 63, 142, 0.18), 0 0 16px var(--glow); }
   .thread { scroll-behavior: auto; }
 }

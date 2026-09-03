@@ -19,6 +19,9 @@ import {
   wipeLocalSettings,
   hasAgreed,
   saveAgreement,
+  loadPin,
+  savePin,
+  normalizePin,
 } from "./storage.js";
 import { ICONS, iconHref } from "./icons.js";
 import { idbGet, idbSet, idbClear } from "./db.js";
@@ -513,8 +516,97 @@ async function refreshWakeCopy() {
 }
 
 function setHeartPulse(on) {
-  document.querySelectorAll(".howl-spin, .howl-logo").forEach((el) => {
-    el.classList.toggle("pulse", on);
+  const spin = $("wake-heart");
+  if (spin) spin.classList.toggle("pulse", on);
+}
+
+let unlocked = false;
+let pinDraft = "";
+
+function paintLockDots() {
+  const dots = document.querySelectorAll("#lock-dots i");
+  dots.forEach((dot, i) => {
+    dot.classList.toggle("on", i < pinDraft.length);
+  });
+}
+
+function showLockNote(text) {
+  const note = $("lock-note");
+  if (!note) return;
+  if (!text) {
+    note.hidden = true;
+    note.textContent = "";
+    return;
+  }
+  note.hidden = false;
+  note.textContent = text;
+}
+
+function openLock() {
+  const lock = $("lock-screen");
+  if (!lock) {
+    unlocked = true;
+    afterUnlock();
+    return;
+  }
+  unlocked = false;
+  pinDraft = "";
+  paintLockDots();
+  showLockNote("");
+  lock.hidden = false;
+}
+
+function closeLock() {
+  const lock = $("lock-screen");
+  if (lock) lock.hidden = true;
+  unlocked = true;
+}
+
+function tryPin(digit) {
+  if (unlocked) return;
+  const lock = $("lock-screen");
+  if (!lock || lock.hidden) return;
+  if (digit === "clear") {
+    pinDraft = "";
+    paintLockDots();
+    showLockNote("");
+    return;
+  }
+  if (digit === "del") {
+    pinDraft = pinDraft.slice(0, -1);
+    paintLockDots();
+    showLockNote("");
+    return;
+  }
+  if (!/^\d$/.test(digit) || pinDraft.length >= 4) return;
+  pinDraft += digit;
+  paintLockDots();
+  if (pinDraft.length < 4) return;
+  if (pinDraft === loadPin()) {
+    showLockNote("");
+    closeLock();
+    afterUnlock();
+    return;
+  }
+  if (lock) {
+    lock.classList.remove("shake");
+    void lock.offsetWidth;
+    lock.classList.add("shake");
+  }
+  showLockNote("Wrong PIN. Try again.");
+  pinDraft = "";
+  window.setTimeout(paintLockDots, 180);
+}
+
+function afterUnlock() {
+  if (!isOnboarded() || !hasAgreed()) {
+    $("start-card").classList.add("open");
+    refreshWakeCopy();
+    return;
+  }
+  loadChat().then(() => {
+    refreshWakeCopy();
+    wake();
   });
 }
 
@@ -522,7 +614,10 @@ function hideSplash() {
   const el = $("splash");
   if (!el || el.classList.contains("gone")) return;
   el.classList.add("gone");
-  window.setTimeout(() => el.remove(), 700);
+  window.setTimeout(() => {
+    el.remove();
+    openLock();
+  }, 420);
 }
 
 async function wake() {
@@ -883,6 +978,49 @@ function bind() {
       syncBeginEnabled();
     });
   });
+  const pad = $("lock-pad");
+  if (pad) {
+    pad.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-k]");
+      if (!btn) return;
+      tryPin(btn.getAttribute("data-k"));
+    });
+  }
+  window.addEventListener("keydown", (e) => {
+    if (!$("lock-screen") || $("lock-screen").hidden) return;
+    if (e.key >= "0" && e.key <= "9") tryPin(e.key);
+    else if (e.key === "Backspace") tryPin("del");
+    else if (e.key === "Escape") tryPin("clear");
+  });
+  $("pin-save").addEventListener("click", () => {
+    const note = $("pin-note");
+    const cur = normalizePin($("pin-current").value);
+    const next = normalizePin($("pin-new").value);
+    const conf = normalizePin($("pin-confirm").value);
+    note.classList.add("show");
+    if (cur !== loadPin()) {
+      note.textContent = "Current PIN is wrong.";
+      return;
+    }
+    if (next.length !== 4) {
+      note.textContent = "New PIN needs 4 digits.";
+      return;
+    }
+    if (next !== conf) {
+      note.textContent = "New PIN and confirm do not match.";
+      return;
+    }
+    savePin(next);
+    $("pin-current").value = "";
+    $("pin-new").value = "";
+    $("pin-confirm").value = "";
+    note.textContent = "PIN saved for this phone.";
+  });
+  ["pin-current", "pin-new", "pin-confirm"].forEach((id) => {
+    $(id).addEventListener("input", () => {
+      $(id).value = normalizePin($(id).value);
+    });
+  });
 }
 
 function syncBeginEnabled() {
@@ -905,25 +1043,16 @@ startSky($("sky"));
 {
   const shown = performance.now();
   const unveil = () => {
-    const wait = Math.max(0, 680 - (performance.now() - shown));
+    const wait = Math.max(0, 720 - (performance.now() - shown));
     window.setTimeout(hideSplash, wait);
   };
   if (document.readyState === "complete") unveil();
   else window.addEventListener("load", unveil, { once: true });
 }
 
-if (!isOnboarded() || !hasAgreed()) {
-  $("start-card").classList.add("open");
-  refreshWakeCopy();
-} else {
-  loadChat().then(() => {
-    refreshWakeCopy();
-    wake();
-  });
-}
-
 function tryResumeEngine() {
   if (document.hidden) return;
+  if (!unlocked) return;
   if (!isOnboarded() || !hasAgreed()) return;
   if (isReady() || waking) return;
   wake();

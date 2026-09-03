@@ -4,7 +4,7 @@
  */
 let coepCredentialless = false;
 if (typeof window === "undefined") {
-  const SHELL = "howl-shell-v2";
+  const SHELL = "howl-shell-v3";
   const PRECACHE = [
     "./",
     "./index.html",

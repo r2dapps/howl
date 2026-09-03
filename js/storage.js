@@ -6,8 +6,10 @@ const THEME_KEY = "liora_theme";
 const ONBOARD_KEY = "liora_onboarded";
 const REL_KEY = "liora_rel";
 const AGREE_KEY = "liora_agree_v1";
+const PIN_KEY = "liora_pin";
 const OLD_CHAR = "amore_ai_char";
 const OLD_USER = "amore_ai_user";
+const DEFAULT_PIN = "0000";
 
 export const THEMES = [
   { id: "night", label: "Night rose" },
@@ -291,6 +293,26 @@ export function saveAgreement() {
   );
 }
 
+export function normalizePin(value) {
+  return String(value || "").replace(/\D/g, "").slice(0, 4);
+}
+
+export function loadPin() {
+  try {
+    const raw = normalizePin(localStorage.getItem(PIN_KEY));
+    return raw.length === 4 ? raw : DEFAULT_PIN;
+  } catch {
+    return DEFAULT_PIN;
+  }
+}
+
+export function savePin(pin) {
+  const next = normalizePin(pin);
+  if (next.length !== 4) return false;
+  localStorage.setItem(PIN_KEY, next);
+  return true;
+}
+
 export function wipeLocalSettings() {
   localStorage.removeItem(CHAR_KEY);
   localStorage.removeItem(USER_KEY);
@@ -298,6 +320,7 @@ export function wipeLocalSettings() {
   localStorage.removeItem(ONBOARD_KEY);
   localStorage.removeItem(REL_KEY);
   localStorage.removeItem(AGREE_KEY);
+  localStorage.removeItem(PIN_KEY);
   localStorage.removeItem("liora_model");
   localStorage.removeItem("liora_chat_id");
 }

@@ -14,13 +14,13 @@ Install needs a **secure context** (HTTPS or `localhost`) plus the service worke
 
 ## Updates (no reinstall)
 
-`coi-serviceworker.js` precaches the app shell (`howl-shell-v2`). When you push a new site:
+`coi-serviceworker.js` precaches the app shell (`howl-shell-v3`). When you push a new site:
 
 1. The browser downloads the new worker in the background.
 2. The worker calls `skipWaiting` and takes over.
 3. The page reloads **once**.
 
-Users keep the same icon. They do not go back to the store or the zip. After you change the shell, bump the cache name in the worker (`howl-shell-v2` → `v3`) so old files are dropped.
+Users keep the same icon. They do not go back to the store or the zip. After you change the shell, bump the cache name in the worker (`howl-shell-v3` → `v4`) so old files are dropped.
 
 The **model** lives in IndexedDB. A UI update does not delete it.
 
