@@ -1,0 +1,10 @@
+models/
+**/.cache/
+.huggingface/
+__pycache__/
+*.pyc
+*.tgz
+.DS_Store
+Thumbs.db
+chatgpt_suggestions.md
+character-ai_demoweb.html
